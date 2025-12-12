@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppLens - Deployment Environments</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* VS Code Dark+ Theme Colors */
+            --vscode-bg: #1e1e1e;
+            --vscode-sidebar-bg: #252526;
+            --vscode-activitybar-bg: #333333;
+            --vscode-editor-bg: #1e1e1e;
+            --vscode-panel-bg: #1e1e1e;
+            --vscode-statusbar-bg: #007acc;
+            --vscode-titlebar-bg: #3c3c3c;
+            --vscode-border: #3c3c3c;
+            --vscode-list-hover: #2a2d2e;
+            --vscode-list-active: #094771;
+            --vscode-list-inactive: #37373d;
+            --vscode-text: #cccccc;
+            --vscode-text-muted: #858585;
+            --vscode-text-bright: #ffffff;
+            --vscode-accent: #007acc;
+            --vscode-accent-secondary: #0098ff;
+            --vscode-success: #4ec9b0;
+            --vscode-warning: #dcdcaa;
+            --vscode-error: #f14c4c;
+            --vscode-info: #75beff;
+            --vscode-string: #ce9178;
+            --vscode-keyword: #569cd6;
+            --vscode-function: #dcdcaa;
+            --vscode-comment: #6a9955;
+            --vscode-number: #b5cea8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--vscode-bg); color: var(--vscode-text); height: 100vh; overflow: hidden; font-size: 13px; }
+        .vscode-container { display: grid; grid-template-columns: 240px 1fr; grid-template-rows: 30px 1fr 22px; height: 100vh; }
+        .titlebar { grid-column: 1 / -1; background: var(--vscode-titlebar-bg); display: flex; align-items: center; padding: 0 12px; gap: 12px; }
+        .titlebar-icon { width: 16px; height: 16px; opacity: 0.8; }
+        .titlebar-title { font-size: 12px; color: var(--vscode-text); opacity: 0.8; }
+        .sidebar { background: var(--vscode-sidebar-bg); border-right: 1px solid var(--vscode-border); display: flex; flex-direction: column; overflow: hidden; }
+        .sidebar-header { padding: 10px 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vscode-text-muted); display: flex; align-items: center; justify-content: space-between; }
+        .sidebar-content { flex: 1; overflow-y: auto; }
+        .tree-item { display: flex; align-items: center; padding: 4px 8px 4px 16px; cursor: pointer; user-select: none; }
+        .tree-item:hover { background: var(--vscode-list-hover); }
+        .tree-item.selected { background: var(--vscode-list-inactive); }
+        .tree-chevron { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; margin-right: 4px; }
+        .tree-chevron svg { width: 16px; height: 16px; fill: var(--vscode-text); transition: transform 0.1s; }
+        .tree-chevron.expanded svg { transform: rotate(90deg); }
+        .tree-icon { width: 16px; height: 16px; margin-right: 6px; }
+        .tree-label { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tree-badge { margin-left: auto; background: var(--vscode-accent); color: white; font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 600; }
+        .tree-badge.warning { background: var(--vscode-warning); color: #1e1e1e; }
+        .tree-badge.success { background: var(--vscode-success); color: #1e1e1e; }
+        .tree-badge.error { background: var(--vscode-error); }
+        .tree-children { display: none; }
+        .tree-children.expanded { display: block; }
+        .tree-children .tree-item { padding-left: 36px; }
+        .tree-children .tree-children .tree-item { padding-left: 56px; }
+        .editor { background: var(--vscode-editor-bg); display: flex; flex-direction: column; overflow: hidden; }
+        .editor-tabs { display: flex; background: var(--vscode-titlebar-bg); border-bottom: 1px solid var(--vscode-border); height: 35px; }
+        .editor-tab { display: flex; align-items: center; padding: 0 12px; gap: 8px; font-size: 13px; border-right: 1px solid var(--vscode-border); cursor: pointer; background: var(--vscode-sidebar-bg); }
+        .editor-tab.active { background: var(--vscode-editor-bg); border-bottom: 1px solid var(--vscode-editor-bg); margin-bottom: -1px; }
+        .editor-tab-close { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border-radius: 4px; opacity: 0; }
+        .editor-tab:hover .editor-tab-close { opacity: 0.7; }
+        .editor-content { flex: 1; overflow-y: auto; padding: 20px 30px; }
+        .breadcrumb { display: flex; align-items: center; gap: 4px; padding: 4px 30px; background: var(--vscode-editor-bg); border-bottom: 1px solid var(--vscode-border); font-size: 12px; color: var(--vscode-text-muted); }
+        .env-section { margin-bottom: 24px; }
+        .env-section-header { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--vscode-border); margin-bottom: 16px; }
+        .env-section-title { font-size: 13px; font-weight: 600; color: var(--vscode-text-bright); text-transform: uppercase; letter-spacing: 0.5px; }
+        .env-section-badge { font-size: 10px; padding: 2px 8px; border-radius: 3px; font-weight: 600; margin-left: auto; }
+        .badge-dev { background: rgba(86, 156, 214, 0.2); color: var(--vscode-keyword); border: 1px solid var(--vscode-keyword); }
+        .badge-staging { background: rgba(220, 220, 170, 0.2); color: var(--vscode-warning); border: 1px solid var(--vscode-warning); }
+        .badge-prod { background: rgba(78, 201, 176, 0.2); color: var(--vscode-success); border: 1px solid var(--vscode-success); }
+        .badge-lkg { background: rgba(241, 76, 76, 0.2); color: var(--vscode-error); border: 1px solid var(--vscode-error); }
+        .env-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .env-card { background: var(--vscode-sidebar-bg); border: 1px solid var(--vscode-border); border-radius: 4px; overflow: hidden; cursor: pointer; transition: all 0.2s; }
+        .env-card:hover { border-color: var(--vscode-accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+        .env-card-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--vscode-activitybar-bg); border-bottom: 1px solid var(--vscode-border); }
+        .env-card-title { display: flex; align-items: center; gap: 8px; }
+        .env-card-title h3 { font-size: 13px; font-weight: 600; color: var(--vscode-text-bright); }
+        .env-card-ring { font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; color: var(--vscode-string); background: rgba(206, 145, 120, 0.15); padding: 2px 6px; border-radius: 3px; }
+        .env-card-body { padding: 12px 16px; }
+        .env-prop { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; border-bottom: 1px solid rgba(60, 60, 60, 0.5); }
+        .env-prop:last-child { border-bottom: none; }
+        .env-prop-key { color: var(--vscode-keyword); }
+        .env-prop-value { color: var(--vscode-text); }
+        .env-prop-value.string { color: var(--vscode-string); }
+        .env-prop-value.number { color: var(--vscode-number); }
+        .env-info-panel { background: var(--vscode-sidebar-bg); border: 1px solid var(--vscode-border); border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; }
+        .card-links { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--vscode-border); }
+        .dashboard-link { display: block; font-size: 10px; color: var(--vscode-accent-secondary); text-decoration: none; opacity: 0.8; }
+        .dashboard-link:hover { opacity: 1; text-decoration: underline; }
+        .lkg-alert { margin-top: 12px; padding: 12px; background: rgba(241, 76, 76, 0.1); border: 1px solid var(--vscode-error); border-radius: 3px; }
+        .lkg-alert-header { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--vscode-error); margin-bottom: 8px; }
+        .lkg-alert-content { font-size: 11px; color: var(--vscode-text-muted); line-height: 1.6; }
+        .lkg-alert-content ul { margin: 4px 0 0 16px; }
+        .detail-section { background: var(--vscode-sidebar-bg); border: 1px solid var(--vscode-border); border-radius: 4px; margin-bottom: 16px; overflow: hidden; }
+        .detail-section-title { font-size: 12px; font-weight: 600; color: var(--vscode-text-bright); padding: 10px 16px; background: var(--vscode-activitybar-bg); border-bottom: 1px solid var(--vscode-border); margin: 0; }
+        .detail-grid { padding: 12px 16px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(60, 60, 60, 0.5); font-size: 12px; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-key { color: var(--vscode-keyword); font-family: 'Consolas', 'Monaco', monospace; }
+        .detail-value { font-family: 'Consolas', 'Monaco', monospace; }
+        .detail-value.string { color: var(--vscode-string); }
+        .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; padding: 12px 16px; }
+        .project-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--vscode-bg); border: 1px solid var(--vscode-border); border-radius: 4px; }
+        .project-item:hover { border-color: var(--vscode-accent); }
+        .project-name { font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; color: var(--vscode-function); }
+        .links-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; padding: 12px 16px; }
+        .link-card { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--vscode-bg); border: 1px solid var(--vscode-border); border-radius: 4px; text-decoration: none; color: var(--vscode-text); transition: all 0.2s; }
+        .link-card:hover { border-color: var(--vscode-accent); background: var(--vscode-list-hover); }
+        .link-card.disabled { opacity: 0.4; pointer-events: none; }
+        .link-arrow { color: var(--vscode-accent-secondary); }
+        .statusbar { grid-column: 1 / -1; background: var(--vscode-statusbar-bg); display: flex; align-items: center; padding: 0 8px; font-size: 12px; color: white; }
+        .statusbar-item { display: flex; align-items: center; gap: 4px; padding: 0 8px; height: 100%; cursor: pointer; }
+        .statusbar-item:hover { background: rgba(255, 255, 255, 0.1); }
+        .statusbar-spacer { flex: 1; }
+        .code-comment { color: var(--vscode-comment); font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; margin: 8px 0; }
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(121, 121, 121, 0.4); }
+    </style>
+</head>
+<body>
+    <div class="vscode-container">
+        <div class="titlebar">
+            <svg class="titlebar-icon" viewBox="0 0 100 100" fill="none">
+                <path d="M95 18.5L75.5 100L0 81.5L95 18.5Z" fill="#0065A9"/>
+                <path d="M75.5 100L30 65L0 81.5L75.5 100Z" fill="#007ACC"/>
+                <path d="M30 65L75.5 0L95 18.5L30 65Z" fill="#1F9CF0"/>
+                <path d="M75.5 0V100L95 18.5L75.5 0Z" fill="#0065A9"/>
+            </svg>
+            <span class="titlebar-title">AppLens - Deployment Environments</span>
+        </div>
+        <div class="sidebar">
+            <div class="sidebar-header">AppLens Environments<span style="font-size: 14px;">···</span></div>
+            <div class="sidebar-content">
+                <div class="tree-item" onclick="selectFolder(this)">
+                    <span class="tree-chevron expanded" onclick="toggleChevron(event, this.parentElement)"><svg viewBox="0 0 16 16"><path d="M6 4l4 4-4 4V4z"/></svg></span>
+                    <span class="tree-icon">📁</span><span class="tree-label">DEPLOYMENT ENVIRONMENTS</span>
+                </div>
+                <div class="tree-children expanded">
+                    <div class="tree-item" onclick="selectFolder(this)">
+                        <span class="tree-chevron expanded" onclick="toggleChevron(event, this.parentElement)"><svg viewBox="0 0 16 16"><path d="M6 4l4 4-4 4V4z"/></svg></span>
+                        <span class="tree-icon">📂</span><span class="tree-label">development</span><span class="tree-badge">DEV</span>
+                    </div>
+                    <div class="tree-children expanded">
+                        <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">💻</span><span class="tree-label">local-machine</span></div>
+                        <div class="tree-item" onclick="selectFolder(this)">
+                            <span class="tree-chevron expanded" onclick="toggleChevron(event, this.parentElement)"><svg viewBox="0 0 16 16"><path d="M6 4l4 4-4 4V4z"/></svg></span>
+                            <span class="tree-icon">☁️</span><span class="tree-label">private-sub-corp</span>
+                        </div>
+                        <div class="tree-children expanded">
+                            <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">👤</span><span class="tree-label">mikono-1</span></div>
+                            <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">👤</span><span class="tree-label">mikono-2</span></div>
+                            <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">👤</span><span class="tree-label">eunseo-1</span></div>
+                            <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">👤</span><span class="tree-label">hawfor-1</span></div>
+                        </div>
+                    </div>
+                    <div class="tree-item" onclick="selectFolder(this)">
+                        <span class="tree-chevron expanded" onclick="toggleChevron(event, this.parentElement)"><svg viewBox="0 0 16 16"><path d="M6 4l4 4-4 4V4z"/></svg></span>
+                        <span class="tree-icon">📂</span><span class="tree-label">pre-prod-ame</span><span class="tree-badge warning">STG</span>
+                    </div>
+                    <div class="tree-children expanded">
+                        <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">🧪</span><span class="tree-label">pre-prod-poland-central-01</span></div>
+                        <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">🧪</span><span class="tree-label">pre-prod-ame-uk-west-01</span></div>
+                    </div>
+                    <div class="tree-item selected" onclick="selectFolder(this)">
+                        <span class="tree-chevron expanded" onclick="toggleChevron(event, this.parentElement)"><svg viewBox="0 0 16 16"><path d="M6 4l4 4-4 4V4z"/></svg></span>
+                        <span class="tree-icon">📂</span><span class="tree-label">prod-ame</span><span class="tree-badge success">PROD</span>
+                    </div>
+                    <div class="tree-children expanded">
+                        <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">🚀</span><span class="tree-label">prod-ame-south-africa-north-01</span></div>
+                        <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">🚀</span><span class="tree-label">prod-ame-spain-central-01</span></div>
+                        <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">🚀</span><span class="tree-label">prod-ame-sweden-central-01</span></div>
+                        <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">🚀</span><span class="tree-label">prod-ame-us-west-3-01</span></div>
+                    </div>
+                    <div class="tree-item" onclick="selectFolder(this)">
+                        <span class="tree-chevron expanded" onclick="toggleChevron(event, this.parentElement)"><svg viewBox="0 0 16 16"><path d="M6 4l4 4-4 4V4z"/></svg></span>
+                        <span class="tree-icon">📂</span><span class="tree-label">lkg-prod-ame</span><span class="tree-badge error">LKG</span>
+                    </div>
+                    <div class="tree-children expanded">
+                        <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">🛡️</span><span class="tree-label">lkg-prod-ame-south-africa-north-02</span></div>
+                        <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">🛡️</span><span class="tree-label">lkg-prod-ame-spain-central-02</span></div>
+                        <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">🛡️</span><span class="tree-label">lkg-prod-ame-sweden-central-02</span></div>
+                        <div class="tree-item" onclick="selectItem(this)"><span class="tree-chevron"></span><span class="tree-icon">🛡️</span><span class="tree-label">lkg-prod-ame-us-west-3-02</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="editor">
+            <div class="editor-tabs"><div class="editor-tab active"><span class="editor-tab-icon">📄</span><span id="active-tab-name">prod-ame</span><span class="editor-tab-close">×</span></div></div>
+            <div class="breadcrumb"><span>AppLens</span><span style="opacity:0.5">›</span><span>environments</span><span style="opacity:0.5">›</span><span id="breadcrumb-current">prod-ame</span></div>
+            <div class="editor-content" id="main-content"></div>
+        </div>
+        <div class="statusbar">
+            <div class="statusbar-item">main</div>
+            <div class="statusbar-item">↻ 0  ⚠ 0</div>
+            <div class="statusbar-spacer"></div>
+            <div class="statusbar-item">Ln 1, Col 1</div>
+            <div class="statusbar-item">UTF-8</div>
+            <div class="statusbar-item">🔔</div>
+        </div>
+    </div>
+    <script>
+        const environmentsData = {
+            'development': { type: 'ring', name: 'Development', icon: '📂', badge: 'DEV', badgeClass: 'badge-dev', description: 'Local development and personal cloud instances.', children: ['local-machine', 'private-sub-corp'] },
+            'local-machine': { type: 'scaleUnit', name: 'local-machine', icon: '💻', environment: 'development', ring: 'local-machine', deployer: 'Developer (Manual)', region: 'localhost', cloud: 'Local', tenant: 'N/A', aspireUrl: 'https://localhost:15888', azurePortalUrl: 'N/A', ev2Url: 'N/A', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi', 'AppLens.IntegrationTests'] },
+            'private-sub-corp': { type: 'environment', name: 'private-sub-corp', icon: '☁️', environment: 'Development', ring: 'private-sub-corp', deployer: 'Developer (Manual)', cloud: 'Azure (Corp Subscription)', description: 'Personal developer instances.', children: ['mikono-1', 'mikono-2', 'eunseo-1', 'hawfor-1'] },
+            'mikono-1': { type: 'scaleUnit', name: 'mikono-1', icon: '👤', environment: 'private-sub-corp', ring: 'private-sub-corp', deployer: 'mikono', region: 'eastus', cloud: 'Azure (Corp)', tenant: 'microsoft.onmicrosoft.com', aspireUrl: 'https://mikono-1.applens.azure.net/dashboard', azurePortalUrl: '#', ev2Url: 'N/A', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'mikono-2': { type: 'scaleUnit', name: 'mikono-2', icon: '👤', environment: 'private-sub-corp', ring: 'private-sub-corp', deployer: 'mikono', region: 'westus2', cloud: 'Azure (Corp)', tenant: 'microsoft.onmicrosoft.com', aspireUrl: 'https://mikono-2.applens.azure.net/dashboard', azurePortalUrl: '#', ev2Url: 'N/A', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'eunseo-1': { type: 'scaleUnit', name: 'eunseo-1', icon: '👤', environment: 'private-sub-corp', ring: 'private-sub-corp', deployer: 'eunseo', region: 'westeurope', cloud: 'Azure (Corp)', tenant: 'microsoft.onmicrosoft.com', aspireUrl: 'https://eunseo-1.applens.azure.net/dashboard', azurePortalUrl: '#', ev2Url: 'N/A', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'hawfor-1': { type: 'scaleUnit', name: 'hawfor-1', icon: '👤', environment: 'private-sub-corp', ring: 'private-sub-corp', deployer: 'hawfor', region: 'northeurope', cloud: 'Azure (Corp)', tenant: 'microsoft.onmicrosoft.com', aspireUrl: 'https://hawfor-1.applens.azure.net/dashboard', azurePortalUrl: '#', ev2Url: 'N/A', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'pre-prod-ame': { type: 'environment', name: 'pre-prod-ame', icon: '📂', badge: 'STG', badgeClass: 'badge-staging', environment: 'Staging', ring: 'pre-prod-ame', deployer: 'Official Pipeline', cloud: 'Azure (AME)', description: 'Pre-production staging environment.', children: ['pre-prod-poland-central-01', 'pre-prod-ame-uk-west-01'] },
+            'pre-prod-poland-central-01': { type: 'scaleUnit', name: 'pre-prod-poland-central-01', icon: '🧪', environment: 'pre-prod-ame', ring: 'pre-prod-ame', deployer: 'Official Pipeline', region: 'Poland Central', cloud: 'Azure (AME)', tenant: 'AME.gbl', aspireUrl: '#', azurePortalUrl: '#', ev2Url: '#', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'pre-prod-ame-uk-west-01': { type: 'scaleUnit', name: 'pre-prod-ame-uk-west-01', icon: '🧪', environment: 'pre-prod-ame', ring: 'pre-prod-ame', deployer: 'Official Pipeline', region: 'UK West', cloud: 'Azure (AME)', tenant: 'AME.gbl', aspireUrl: '#', azurePortalUrl: '#', ev2Url: '#', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'prod-ame': { type: 'environment', name: 'prod-ame', icon: '📂', badge: 'PROD', badgeClass: 'badge-prod', environment: 'Production', ring: 'prod-ame', deployer: 'Official Pipeline', cloud: 'Azure (AME)', description: 'Production environment serving live traffic.', children: ['prod-ame-south-africa-north-01', 'prod-ame-spain-central-01', 'prod-ame-sweden-central-01', 'prod-ame-us-west-3-01'] },
+            'prod-ame-south-africa-north-01': { type: 'scaleUnit', name: 'prod-ame-south-africa-north-01', icon: '🚀', environment: 'prod-ame', ring: 'prod-ame', deployer: 'Official Pipeline', region: 'South Africa North', cloud: 'Azure (AME)', tenant: 'AME.gbl', aspireUrl: '#', azurePortalUrl: '#', ev2Url: '#', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'prod-ame-spain-central-01': { type: 'scaleUnit', name: 'prod-ame-spain-central-01', icon: '🚀', environment: 'prod-ame', ring: 'prod-ame', deployer: 'Official Pipeline', region: 'Spain Central', cloud: 'Azure (AME)', tenant: 'AME.gbl', aspireUrl: '#', azurePortalUrl: '#', ev2Url: '#', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'prod-ame-sweden-central-01': { type: 'scaleUnit', name: 'prod-ame-sweden-central-01', icon: '🚀', environment: 'prod-ame', ring: 'prod-ame', deployer: 'Official Pipeline', region: 'Sweden Central', cloud: 'Azure (AME)', tenant: 'AME.gbl', aspireUrl: '#', azurePortalUrl: '#', ev2Url: '#', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'prod-ame-us-west-3-01': { type: 'scaleUnit', name: 'prod-ame-us-west-3-01', icon: '🚀', environment: 'prod-ame', ring: 'prod-ame', deployer: 'Official Pipeline', region: 'US West 3', cloud: 'Azure (AME)', tenant: 'AME.gbl', aspireUrl: '#', azurePortalUrl: '#', ev2Url: '#', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'lkg-prod-ame': { type: 'environment', name: 'lkg-prod-ame', icon: '📂', badge: 'LKG', badgeClass: 'badge-lkg', environment: 'Production', ring: 'lkg-prod-ame', deployer: 'Official Pipeline', cloud: 'Azure (AME)', isLkg: true, description: 'Last Known Good production failback.', children: ['lkg-prod-ame-south-africa-north-02', 'lkg-prod-ame-spain-central-02', 'lkg-prod-ame-sweden-central-02', 'lkg-prod-ame-us-west-3-02'] },
+            'lkg-prod-ame-south-africa-north-02': { type: 'scaleUnit', name: 'lkg-prod-ame-south-africa-north-02', icon: '🛡️', environment: 'lkg-prod-ame', ring: 'lkg-prod-ame', deployer: 'Official Pipeline', region: 'South Africa North', cloud: 'Azure (AME)', tenant: 'AME.gbl', isLkg: true, aspireUrl: '#', azurePortalUrl: '#', ev2Url: '#', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'lkg-prod-ame-spain-central-02': { type: 'scaleUnit', name: 'lkg-prod-ame-spain-central-02', icon: '🛡️', environment: 'lkg-prod-ame', ring: 'lkg-prod-ame', deployer: 'Official Pipeline', region: 'Spain Central', cloud: 'Azure (AME)', tenant: 'AME.gbl', isLkg: true, aspireUrl: '#', azurePortalUrl: '#', ev2Url: '#', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'lkg-prod-ame-sweden-central-02': { type: 'scaleUnit', name: 'lkg-prod-ame-sweden-central-02', icon: '🛡️', environment: 'lkg-prod-ame', ring: 'lkg-prod-ame', deployer: 'Official Pipeline', region: 'Sweden Central', cloud: 'Azure (AME)', tenant: 'AME.gbl', isLkg: true, aspireUrl: '#', azurePortalUrl: '#', ev2Url: '#', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] },
+            'lkg-prod-ame-us-west-3-02': { type: 'scaleUnit', name: 'lkg-prod-ame-us-west-3-02', icon: '🛡️', environment: 'lkg-prod-ame', ring: 'lkg-prod-ame', deployer: 'Official Pipeline', region: 'US West 3', cloud: 'Azure (AME)', tenant: 'AME.gbl', isLkg: true, aspireUrl: '#', azurePortalUrl: '#', ev2Url: '#', projects: ['AppLens.AppHost', 'AppLens.Frontend', 'AppLens.ProxyApi', 'AppLens.RuntimeApi'] }
+        };
+        function renderScaleUnitView(data) {
+            const isLkg = data.isLkg || false;
+            const lkgAlert = isLkg ? '<div class="lkg-alert"><div class="lkg-alert-header">⚠️ Last Known Good - Failback Target</div><div class="lkg-alert-content">This scale unit is part of the LKG ring for <strong>quick production mitigation</strong>:<ul><li>Contains last stable deployment</li><li>Traffic redirected during incidents</li><li>Minimizes MTTR</li></ul></div></div>' : '';
+            return '<p class="code-comment">// Scale Unit Details</p><section class="env-section"><div class="env-section-header"><span class="env-section-icon">'+data.icon+'</span><span class="env-section-title">'+data.name+'</span><span class="env-section-badge '+(isLkg ? 'badge-lkg' : (data.environment.includes('prod') && !data.environment.includes('pre-prod') ? 'badge-prod' : (data.environment.includes('pre-prod') ? 'badge-staging' : 'badge-dev')))+'">'+(isLkg ? 'LKG' : (data.environment.includes('prod') && !data.environment.includes('pre-prod') ? 'PROD' : (data.environment.includes('pre-prod') ? 'STG' : 'DEV')))+'</span></div>'+lkgAlert+'<div class="scale-unit-detail"><div class="detail-section"><h4 class="detail-section-title">📋 Scale Unit Information</h4><div class="detail-grid"><div class="detail-row"><span class="detail-key">name:</span><span class="detail-value string">"'+data.name+'"</span></div><div class="detail-row"><span class="detail-key">environment:</span><span class="detail-value string">"'+data.environment+'"</span></div><div class="detail-row"><span class="detail-key">ring:</span><span class="detail-value string">"'+data.ring+'"</span></div><div class="detail-row"><span class="detail-key">deployer:</span><span class="detail-value string">"'+data.deployer+'"</span></div><div class="detail-row"><span class="detail-key">region:</span><span class="detail-value string">"'+data.region+'"</span></div><div class="detail-row"><span class="detail-key">cloud:</span><span class="detail-value string">"'+data.cloud+'"</span></div><div class="detail-row"><span class="detail-key">tenant:</span><span class="detail-value string">"'+data.tenant+'"</span></div></div></div><div class="detail-section"><h4 class="detail-section-title">📦 Component Projects</h4><div class="projects-grid">'+data.projects.map(function(proj){return '<div class="project-item"><span class="project-icon">'+(proj.includes('AppHost') ? '🏠' : (proj.includes('Frontend') ? '🌐' : (proj.includes('Api') ? '⚡' : '🧪')))+'</span><span class="project-name">'+proj+'</span></div>';}).join('')+'</div></div><div class="detail-section"><h4 class="detail-section-title">🔗 Quick Links</h4><div class="links-grid"><a href="'+data.aspireUrl+'" target="_blank" class="link-card"><span>📊</span><span class="link-label">Aspire Dashboard</span><span class="link-arrow">→</span></a><a href="'+data.azurePortalUrl+'" target="_blank" class="link-card '+(data.azurePortalUrl === 'N/A' ? 'disabled' : '')+'"><span>☁️</span><span class="link-label">Azure Portal</span><span class="link-arrow">→</span></a><a href="'+data.ev2Url+'" target="_blank" class="link-card '+(data.ev2Url === 'N/A' ? 'disabled' : '')+'"><span>🚀</span><span class="link-label">EV2 Deployment</span><span class="link-arrow">→</span></a></div></div></div></section>';
+        }
+        function renderScaleUnitCard(data) {
+            return '<div class="env-card" onclick="navigateTo(\''+data.name+'\')"><div class="env-card-header"><div class="env-card-title"><span>'+data.icon+'</span><h3>'+data.name+'</h3></div><span class="env-card-ring">'+data.region+'</span></div><div class="env-card-body"><div class="env-prop"><span class="env-prop-key">deployer:</span><span class="env-prop-value string">"'+data.deployer+'"</span></div><div class="env-prop"><span class="env-prop-key">cloud:</span><span class="env-prop-value string">"'+data.cloud+'"</span></div><div class="env-prop"><span class="env-prop-key">tenant:</span><span class="env-prop-value string">"'+data.tenant+'"</span></div><div class="env-prop"><span class="env-prop-key">projects:</span><span class="env-prop-value number">'+data.projects.length+'</span></div><div class="card-links"><a href="'+data.aspireUrl+'" target="_blank" class="dashboard-link" onclick="event.stopPropagation()">📊 Aspire Dashboard →</a></div></div></div>';
+        }
+        function renderEnvironmentView(data) {
+            var children = data.children || [];
+            var childCards = children.map(function(childId) { var childData = environmentsData[childId]; return childData && childData.type === 'scaleUnit' ? renderScaleUnitCard(childData) : ''; }).join('');
+            var isLkg = data.isLkg || false;
+            var lkgAlert = isLkg ? '<div class="lkg-alert" style="margin-bottom:20px"><div class="lkg-alert-header">⚠️ Last Known Good - Failback Ring</div><div class="lkg-alert-content">This environment serves as the <strong>failback target</strong> for quick production mitigation:<ul><li>Contains last stable deployment</li><li>Enables instant traffic failback</li><li>Minimizes MTTR</li></ul></div></div>' : '';
+            return '<p class="code-comment">// Environment: '+data.name+'</p><section class="env-section"><div class="env-section-header"><span class="env-section-icon">'+data.icon+'</span><span class="env-section-title">'+data.name+'</span><span class="env-section-badge '+(data.badgeClass || 'badge-dev')+'">'+(data.badge || 'ENV')+'</span></div>'+lkgAlert+'<div class="env-info-panel"><div class="env-prop"><span class="env-prop-key">environment:</span><span class="env-prop-value string">"'+data.environment+'"</span></div><div class="env-prop"><span class="env-prop-key">ring:</span><span class="env-prop-value string">"'+data.ring+'"</span></div><div class="env-prop"><span class="env-prop-key">deployer:</span><span class="env-prop-value string">"'+data.deployer+'"</span></div><div class="env-prop"><span class="env-prop-key">cloud:</span><span class="env-prop-value string">"'+data.cloud+'"</span></div><div class="env-prop"><span class="env-prop-key">scaleUnits:</span><span class="env-prop-value number">'+children.length+'</span></div></div><p class="code-comment" style="margin-top:20px">// Scale Units ('+children.length+')</p><div class="env-cards">'+childCards+'</div></section>';
+        }
+        function renderRingOverview(data) {
+            return '<p class="code-comment">// Ring Overview: '+data.name+'</p><section class="env-section"><div class="env-section-header"><span class="env-section-icon">'+data.icon+'</span><span class="env-section-title">'+data.name+'</span><span class="env-section-badge '+data.badgeClass+'">'+data.badge+'</span></div><div class="env-info-panel"><p style="color:var(--vscode-text-muted)">'+data.description+'</p></div></section>';
+        }
+        function navigateTo(itemId) {
+            var data = environmentsData[itemId];
+            if (!data) return;
+            document.getElementById('active-tab-name').textContent = itemId;
+            document.getElementById('breadcrumb-current').textContent = itemId;
+            document.querySelectorAll('.tree-item').forEach(function(item) { item.classList.remove('selected'); var label = item.querySelector('.tree-label'); if (label && label.textContent === itemId) item.classList.add('selected'); });
+            var contentEl = document.getElementById('main-content');
+            if (data.type === 'scaleUnit') contentEl.innerHTML = renderScaleUnitView(data);
+            else if (data.type === 'environment') contentEl.innerHTML = renderEnvironmentView(data);
+            else if (data.type === 'ring') contentEl.innerHTML = renderRingOverview(data);
+        }
+        function toggleChevron(event, element) {
+            event.stopPropagation();
+            var chevron = element.querySelector('.tree-chevron');
+            var nextSibling = element.nextElementSibling;
+            if (chevron && nextSibling && nextSibling.classList.contains('tree-children')) { chevron.classList.toggle('expanded'); nextSibling.classList.toggle('expanded'); }
+        }
+        function selectFolder(element) { var label = element.querySelector('.tree-label'); if (label) { var itemId = label.textContent; var data = environmentsData[itemId]; if (data && (data.type === 'environment' || data.type === 'ring')) navigateTo(itemId); } }
+        function selectItem(element) { var label = element.querySelector('.tree-label'); if (label) navigateTo(label.textContent); }
+        document.addEventListener('DOMContentLoaded', function() { navigateTo('prod-ame'); });
+    </script>
+</body>
+</html>
