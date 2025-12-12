@@ -37,10 +37,11 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--vscode-bg); color: var(--vscode-text); height: 100vh; overflow: hidden; font-size: 13px; }
         .vscode-container { display: grid; grid-template-columns: 240px 1fr; grid-template-rows: 30px 1fr 22px; height: 100vh; }
-        .titlebar { grid-column: 1 / -1; background: var(--vscode-titlebar-bg); display: flex; align-items: center; padding: 0 12px; gap: 12px; }
+        .titlebar { grid-column: 1 / -1; grid-row: 1; background: var(--vscode-titlebar-bg); display: flex; align-items: center; padding: 0 12px; gap: 12px; }
         .titlebar-icon { width: 16px; height: 16px; opacity: 0.8; }
         .titlebar-title { font-size: 12px; color: var(--vscode-text); opacity: 0.8; }
-        .sidebar { background: var(--vscode-sidebar-bg); border-right: 1px solid var(--vscode-border); display: flex; flex-direction: column; overflow: hidden; }
+        .sidebar { grid-column: 1; grid-row: 2; background: var(--vscode-sidebar-bg); border-right: 1px solid var(--vscode-border); display: flex; flex-direction: column; overflow: hidden; }
+        .sidebar-overlay { display: none; }
         .sidebar-header { padding: 10px 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--vscode-text-muted); display: flex; align-items: center; justify-content: space-between; }
         .sidebar-content { flex: 1; overflow-y: auto; }
         .tree-item { display: flex; align-items: center; padding: 4px 8px 4px 16px; cursor: pointer; user-select: none; }
@@ -59,7 +60,7 @@
         .tree-children.expanded { display: block; }
         .tree-children .tree-item { padding-left: 36px; }
         .tree-children .tree-children .tree-item { padding-left: 56px; }
-        .editor { background: var(--vscode-editor-bg); display: flex; flex-direction: column; overflow: hidden; }
+        .editor { grid-column: 2; grid-row: 2; background: var(--vscode-editor-bg); display: flex; flex-direction: column; overflow: hidden; }
         .editor-tabs { display: flex; background: var(--vscode-titlebar-bg); border-bottom: 1px solid var(--vscode-border); height: 35px; }
         .editor-tab { display: flex; align-items: center; padding: 0 12px; gap: 8px; font-size: 13px; border-right: 1px solid var(--vscode-border); cursor: pointer; background: var(--vscode-sidebar-bg); }
         .editor-tab.active { background: var(--vscode-editor-bg); border-bottom: 1px solid var(--vscode-editor-bg); margin-bottom: -1px; }
@@ -114,7 +115,7 @@
         .link-card:hover { border-color: var(--vscode-accent); background: var(--vscode-list-hover); }
         .link-card.disabled { opacity: 0.4; pointer-events: none; }
         .link-arrow { color: var(--vscode-accent-secondary); }
-        .statusbar { grid-column: 1 / -1; background: var(--vscode-statusbar-bg); display: flex; align-items: center; padding: 0 8px; font-size: 12px; color: white; }
+        .statusbar { grid-column: 1 / -1; grid-row: 3; background: var(--vscode-statusbar-bg); display: flex; align-items: center; padding: 0 8px; font-size: 12px; color: white; }
         .statusbar-item { display: flex; align-items: center; gap: 4px; padding: 0 8px; height: 100%; cursor: pointer; }
         .statusbar-item:hover { background: rgba(255, 255, 255, 0.1); }
         .statusbar-spacer { flex: 1; }
@@ -122,11 +123,188 @@
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(121, 121, 121, 0.4); }
+
+        /* Mobile hamburger menu button */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--vscode-text);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .vscode-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 30px 1fr 22px;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 30px;
+                left: 0;
+                width: 280px;
+                height: calc(100vh - 52px);
+                z-index: 1000;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 30px;
+                left: 0;
+                right: 0;
+                bottom: 22px;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .editor {
+                grid-column: 1;
+            }
+
+            .editor-content {
+                padding: 16px;
+            }
+
+            .breadcrumb {
+                padding: 4px 16px;
+                flex-wrap: wrap;
+            }
+
+            /* Fix detail rows for mobile */
+            .detail-row {
+                flex-direction: column;
+                gap: 4px;
+                align-items: flex-start;
+            }
+
+            .detail-value {
+                word-break: break-all;
+            }
+
+            /* Fix environment property rows */
+            .env-prop {
+                flex-direction: column;
+                gap: 4px;
+                align-items: flex-start;
+            }
+
+            .env-prop-value {
+                word-break: break-all;
+            }
+
+            /* Cards grid - single column on mobile */
+            .env-cards {
+                grid-template-columns: 1fr;
+            }
+
+            /* Projects and links grid - single column on mobile */
+            .projects-grid,
+            .links-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Card header adjustments */
+            .env-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .env-card-ring {
+                align-self: flex-start;
+            }
+
+            /* Section header adjustments */
+            .env-section-header {
+                flex-wrap: wrap;
+            }
+
+            .env-section-title {
+                word-break: break-word;
+            }
+
+            /* Sidebar tree items */
+            .tree-label {
+                font-size: 12px;
+            }
+
+            /* Status bar adjustments */
+            .statusbar {
+                font-size: 11px;
+                overflow-x: auto;
+            }
+
+            .statusbar-item {
+                padding: 0 6px;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .editor-content {
+                padding: 12px;
+            }
+
+            .env-section-title {
+                font-size: 12px;
+            }
+
+            .detail-section-title {
+                font-size: 11px;
+                padding: 8px 12px;
+            }
+
+            .detail-grid {
+                padding: 10px 12px;
+            }
+
+            .projects-grid,
+            .links-grid {
+                padding: 10px 12px;
+            }
+
+            .link-card {
+                padding: 10px 12px;
+            }
+
+            .project-item {
+                padding: 8px 10px;
+            }
+
+            .env-info-panel {
+                padding: 10px 12px;
+            }
+
+            .lkg-alert {
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="vscode-container">
         <div class="titlebar">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
             <svg class="titlebar-icon" viewBox="0 0 100 100" fill="none">
                 <path d="M95 18.5L75.5 100L0 81.5L95 18.5Z" fill="#0065A9"/>
                 <path d="M75.5 100L30 65L0 81.5L75.5 100Z" fill="#007ACC"/>
@@ -135,6 +313,7 @@
             </svg>
             <span class="titlebar-title">AppLens - Deployment Environments</span>
         </div>
+        <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
         <div class="sidebar">
             <div class="sidebar-header">AppLens Environments<span style="font-size: 14px;">···</span></div>
             <div class="sidebar-content">
@@ -263,8 +442,23 @@
             var nextSibling = element.nextElementSibling;
             if (chevron && nextSibling && nextSibling.classList.contains('tree-children')) { chevron.classList.toggle('expanded'); nextSibling.classList.toggle('expanded'); }
         }
-        function selectFolder(element) { var label = element.querySelector('.tree-label'); if (label) { var itemId = label.textContent; var data = environmentsData[itemId]; if (data && (data.type === 'environment' || data.type === 'ring')) navigateTo(itemId); } }
-        function selectItem(element) { var label = element.querySelector('.tree-label'); if (label) navigateTo(label.textContent); }
+        function selectFolder(element) { var label = element.querySelector('.tree-label'); if (label) { var itemId = label.textContent; var data = environmentsData[itemId]; if (data && (data.type === 'environment' || data.type === 'ring')) { navigateTo(itemId); closeSidebarOnMobile(); } } }
+        function selectItem(element) { var label = element.querySelector('.tree-label'); if (label) { navigateTo(label.textContent); closeSidebarOnMobile(); } }
+        function toggleSidebar() {
+            var sidebar = document.querySelector('.sidebar');
+            var overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+        // Close sidebar when clicking a menu item on mobile
+        function closeSidebarOnMobile() {
+            if (window.innerWidth <= 768) {
+                var sidebar = document.querySelector('.sidebar');
+                var overlay = document.querySelector('.sidebar-overlay');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+            }
+        }
         document.addEventListener('DOMContentLoaded', function() { navigateTo('prod-ame'); });
     </script>
 </body>
