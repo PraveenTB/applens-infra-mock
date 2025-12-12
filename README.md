@@ -2,6 +2,10 @@
 
 A VS Code-styled visualization of the AppLens deployment infrastructure, showing environments, scale units, and the Last Known Good (LKG) failback architecture.
 
+## 🌐 Live Demo
+
+[![View Demo](https://img.shields.io/badge/🚀_View_Live_Demo-Visit_UI-blue?style=for-the-badge&logo=github)](https://praveentb.github.io/applens-infra-mock/)
+
 
 ## 🗂️ Deployment Environments Structure
 
@@ -225,3 +229,25 @@ Each scale unit provides access to:
 | pre-prod-ame | STG | 2 | Azure (AME) | Pipeline |
 | prod-ame | PROD | 4 | Azure (AME) | Pipeline |
 | lkg-prod-ame | LKG | 4 | Azure (AME) | Pipeline |
+
+---
+
+## 📸 Screenshots
+
+### Environments Structure
+
+The sidebar displays the hierarchical structure of all deployment environments, organized by rings (DEV, STG, PROD, LKG). Each environment contains scale units that can be expanded to view individual deployments.
+
+![Environments Structure](screenshots/environments-structure.png)
+
+### Production Environment Overview
+
+When selecting a production environment, you can see all the scale units deployed across different regions, along with environment metadata and quick access links.
+
+![Production Environment](screenshots/prod-environment.png)
+
+### Scale Unit Details & Quick Links
+
+Clicking on a specific scale unit reveals detailed information including region, cloud provider, tenant, component projects, and quick links to Aspire Dashboard, Azure Portal, and EV2 Deployment.
+
+![Scale Unit Details](screenshots/scale-unit-details.png)
