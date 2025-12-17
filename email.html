@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Clone</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use Inter font family -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+
+        /* Custom scrollbar for better visual appeal */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1; /* slate-300 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background-color: #f8fafc; /* slate-50 */
+        }
+        
+        .gmail-primary-color {
+            color: #d93025; /* Gmail red for icons/highlights */
+        }
+        
+        /* Ensure compose button floats above content on mobile */
+        @media (max-width: 768px) {
+            #compose-button {
+                bottom: 20px;
+                right: 20px;
+                width: 56px;
+                height: 56px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <!-- Global State Variables (Managed by JavaScript) -->
+    <script>
+        // Use a UUID replacement for simple ID generation
+        const generateId = () => Math.random().toString(36).substring(2, 9);
+        
+        // Mock Email Data
+        let emails = [
+            { id: generateId(), sender: "Google Team", subject: "Welcome to your new Inbox!", body: "We've made managing your emails easier than ever. This is a primary message.", time: "Dec 16", category: "primary", read: false, starred: true, tags: ["Important"] },
+            { id: generateId(), sender: "DevOps Alerts", subject: "Critical: Server Load Spikes Detected (URGENT)", body: "The main application server hit 95% CPU load at 15:30 UTC. Please investigate immediately.", time: "10:30 AM", category: "primary", read: false, starred: false, tags: ["Urgent"] },
+            { id: generateId(), sender: "LinkedIn", subject: "You appeared in 10 searches this week", body: "See who's been looking at your profile and grow your network!", time: "8:00 AM", category: "social", read: false, starred: false, tags: ["Social", "Networking"] },
+            { id: generateId(), sender: "GitHub", subject: "[Project-X] Pull Request #15 merged", body: "The feature branch was successfully merged into main by Jane Doe.", time: "Dec 15", category: "primary", read: true, starred: false, tags: ["Development"] },
+            { id: generateId(), sender: "Amazon", subject: "Your shipment has been delivered", body: "The package containing 'The Pragmatic Programmer' arrived today.", time: "Dec 14", category: "updates", read: true, starred: true, tags: ["Shopping"] },
+            { id: generateId(), sender: "Marketing Weekly", subject: "10 Growth Hacks for 2025", body: "Check out our latest strategies for organic and paid growth in the new year.", time: "Dec 13", category: "promotions", read: false, starred: false, tags: ["Newsletter"] },
+            { id: generateId(), sender: "Team Meeting", subject: "Draft: Q4 Review Slides", body: "Attached are the draft slides for our quarterly review. Please provide feedback by EOD.", time: "9:00 AM", category: "primary", read: false, starred: false, tags: ["Work"] },
+            { id: generateId(), sender: "Spotify", subject: "New Music Mix for You", body: "Discover your personalized mix of new releases and classic tracks.", time: "Dec 12", category: "social", read: true, starred: false, tags: ["Social"] },
+            { id: generateId(), sender: "Your Bank", subject: "Statement Available: November 2025", body: "Your monthly bank statement is ready to view online.", time: "Dec 11", category: "updates", read: true, starred: false, tags: ["Finance"] },
+            { id: generateId(), sender: "News Digest", subject: "Top 5 Stories of the Week", body: "A summary of global events and tech trends.", time: "Dec 10", category: "promotions", read: false, starred: true, tags: ["Newsletter"] },
+            { id: generateId(), sender: "Sent Item", subject: "Re: Project Timeline Proposal", body: "I've reviewed the proposal and it looks solid. Let's schedule a kickoff.", time: "Dec 9", category: "sent", read: true, starred: false, tags: ["Work"] },
+            { id: generateId(), sender: "Draft", subject: "Follow up on client demo", body: "The client seemed very interested in the new features. I need to outline the next steps.", time: "Dec 8", category: "drafts", read: false, starred: false, tags: ["Draft"] },
+            { id: generateId(), sender: "HR Department", subject: "Upcoming Holiday Schedule", body: "Please review the office closures and holiday pay schedule for the upcoming season.", time: "Dec 7", category: "updates", read: true, starred: false, tags: ["HR"] },
+        ];
+
+        let activeTab = 'primary'; // Initial active tab (Primary is default Inbox)
+        let selectedEmailId = null; // ID of the email currently being read
+        let isSidebarOpen = false; // State for mobile sidebar
+
+        // Configuration for tabs and sidebar
+        const tabs = [
+            { name: "primary", label: "Primary", icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2h4m2-4v4m0-4l-4 4m4-4h.01M16 12a4 4 0 10-8 0 4 4 0 008 0z" /></svg>` },
+            { name: "promotions", label: "Promotions", icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5h2.25m-2.25 0h2.25V14m0 0h3.75v-2.75A2.25 2.25 0 0013.75 9h-2.25m-4.5 0A2.25 2.25 0 007 11.25zM15.5 14h-1.5m1.5 0V11m0 0h-3.75" /></svg>` },
+            { name: "social", label: "Social", icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>` },
+            { name: "updates", label: "Updates", icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>` },
+        ];
+
+        const sidebarItems = [
+            // These are handled by the tab logic above, but added for completeness if the user clicks on the full sidebar list
+            { name: "Inbox", icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm0 16H5V5h14v14zM17 8H7v1.8l5 3.3 5-3.3zm0 5l-5 3-5-3v4h10z" /></svg>`, type: "nav", filter: (email) => email.category !== 'sent' && email.category !== 'drafts' },
+            { name: "Starred", icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>`, type: "nav", filter: (email) => email.starred },
+            { name: "Sent", icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3v7l15 2-15 2z" /></svg>`, type: "nav", filter: (email) => email.category === 'sent' },
+            { name: "Drafts", icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4zM12 9c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-7C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" /></svg>`, type: "nav", filter: (email) => email.category === 'drafts' },
+            { name: "Separator", type: "separator" },
+            { name: "Tags: Work", icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z" /></svg>`, type: "label", filter: (email) => email.tags.includes('Work') },
+            { name: "Tags: Important", icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8v8H8V8h8m2-2H6v12h12V6z" /></svg>`, type: "label", filter: (email) => email.tags.includes('Important') },
+        ];
+
+
+        /**
+         * Renders the list of emails based on the active tab or filter.
+         */
+        function renderEmailList() {
+            const emailList = document.getElementById('email-list');
+            if (!emailList) return;
+
+            // Determine the filter based on the activeTab
+            let currentFilter = (email) => email.category === activeTab;
+
+            // Handle non-category based tabs (like Starred, Sent, Drafts)
+            const navItem = sidebarItems.find(item => item.name === activeTab);
+            if (navItem && navItem.filter) {
+                currentFilter = navItem.filter;
+            } else if (activeTab.startsWith('Tags:')) {
+                const tag = activeTab.split(': ')[1];
+                currentFilter = (email) => email.tags.includes(tag);
+            } else if (activeTab === 'Inbox') {
+                // Default Inbox view includes all except sent/drafts (similar to Gmail's primary+social+promotions+updates)
+                currentFilter = (email) => email.category !== 'sent' && email.category !== 'drafts';
+            }
+
+
+            const filteredEmails = emails.filter(currentFilter).sort((a, b) => b.time.localeCompare(a.time)); // Mock sort by time
+
+            let listHTML = '';
+
+            if (filteredEmails.length === 0) {
+                listHTML = `<div class="p-8 text-center text-gray-500">No emails found in ${activeTab}.</div>`;
+            } else {
+                filteredEmails.forEach(email => {
+                    const isUnreadClass = email.read ? 'font-normal text-gray-700 bg-white' : 'font-bold text-gray-900 bg-blue-50';
+                    const starColor = email.starred ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-400';
+
+                    listHTML += `
+                        <div id="email-${email.id}" class="email-item flex items-center p-3 border-b border-gray-200 cursor-pointer transition duration-150 ease-in-out hover:shadow-md ${isUnreadClass}" onclick="viewEmail('${email.id}')">
+                            <!-- Checkbox and Star -->
+                            <div class="flex-shrink-0 flex items-center">
+                                <input type="checkbox" class="h-4 w-4 text-blue-600 rounded mr-4 focus:ring-blue-500">
+                                <button onclick="event.stopPropagation(); toggleStar('${email.id}')" class="star-button p-1 rounded-full hover:bg-gray-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ${starColor} transition-colors" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+                                </button>
+                            </div>
+
+                            <!-- Sender and Subject (Hidden on Mobile) -->
+                            <div class="flex-1 min-w-0 mr-4 hidden sm:block">
+                                <div class="truncate ${email.read ? 'font-normal' : 'font-bold'}">${email.sender}</div>
+                                <div class="text-sm truncate text-gray-500">${email.subject} - <span class="text-xs text-gray-500">${email.body.substring(0, 50)}...</span></div>
+                            </div>
+                            
+                            <!-- Sender and Subject (Mobile View) -->
+                            <div class="flex-1 min-w-0 mr-4 block sm:hidden">
+                                <div class="text-sm truncate ${email.read ? 'font-normal' : 'font-bold'}">${email.sender}</div>
+                                <div class="text-sm truncate text-gray-500">${email.subject}</div>
+                            </div>
+
+                            <!-- Time -->
+                            <div class="text-xs font-semibold text-gray-500 flex-shrink-0">${email.time}</div>
+                        </div>
+                    `;
+                });
+            }
+
+            emailList.innerHTML = listHTML;
+            document.getElementById('email-list-container').classList.remove('hidden');
+            document.getElementById('email-view-container').classList.add('hidden');
+            
+            // Highlight active tab/nav item
+            document.querySelectorAll('.tab-item, .nav-item').forEach(el => {
+                if (el.dataset.tab === activeTab) {
+                    el.classList.add('bg-blue-100', 'font-bold', 'text-blue-800');
+                    el.classList.remove('hover:bg-gray-200', 'text-gray-700');
+                } else {
+                    el.classList.remove('bg-blue-100', 'font-bold', 'text-blue-800');
+                    el.classList.add('hover:bg-gray-200', 'text-gray-700');
+                }
+            });
+        }
+
+        /**
+         * Toggles the starred status of an email.
+         * @param {string} id - The ID of the email to update.
+         */
+        function toggleStar(id) {
+            const emailIndex = emails.findIndex(e => e.id === id);
+            if (emailIndex > -1) {
+                emails[emailIndex].starred = !emails[emailIndex].starred;
+                renderEmailList(); // Re-render the list to update the star icon
+            }
+        }
+
+
+        /**
+         * Sets the active tab and re-renders the email list.
+         * @param {string} tabName - The name of the tab to activate.
+         */
+        function setActiveTab(tabName) {
+            activeTab = tabName;
+            selectedEmailId = null; // Clear selected email when changing tabs
+            renderEmailList();
+            
+            // Close sidebar on mobile after selection
+            if (isSidebarOpen) {
+                toggleSidebar();
+            }
+        }
+
+        /**
+         * Renders the detailed view of a single email.
+         * @param {string} id - The ID of the email to display.
+         */
+        function viewEmail(id) {
+            const email = emails.find(e => e.id === id);
+            if (!email) return;
+
+            // Mark as read
+            if (!email.read) {
+                email.read = true;
+                // Re-render the list item to reflect the read state
+                const listItem = document.getElementById(`email-${id}`);
+                if (listItem) {
+                    listItem.classList.remove('font-bold', 'bg-blue-50', 'text-gray-900');
+                    listItem.classList.add('font-normal', 'bg-white', 'text-gray-700');
+                }
+            }
+
+            selectedEmailId = id;
+            
+            document.getElementById('view-subject').textContent = email.subject;
+            document.getElementById('view-sender-icon').textContent = email.sender[0].toUpperCase();
+            document.getElementById('view-sender-name').textContent = email.sender;
+            document.getElementById('view-time').textContent = email.time;
+            document.getElementById('view-body').innerHTML = `<p class="leading-relaxed">${email.body.replace(/\n/g, '<br>')}</p>`;
+
+            // Toggle visibility
+            document.getElementById('email-list-container').classList.add('hidden');
+            document.getElementById('email-view-container').classList.remove('hidden');
+        }
+
+        /**
+         * Closes the detailed email view and returns to the list.
+         */
+        function closeEmailView() {
+            selectedEmailId = null;
+            document.getElementById('email-list-container').classList.remove('hidden');
+            document.getElementById('email-view-container').classList.add('hidden');
+            // Re-render list to ensure unread status is correct (optional, but good practice)
+            renderEmailList();
+        }
+        
+        /**
+         * Toggles the sidebar visibility on mobile devices.
+         */
+        function toggleSidebar() {
+            isSidebarOpen = !isSidebarOpen;
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            if (isSidebarOpen) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Shows the compose email modal.
+         */
+        function showComposeModal() {
+            document.getElementById('compose-modal').classList.remove('hidden');
+            // Clear previous content
+            document.getElementById('compose-to').value = '';
+            document.getElementById('compose-subject').value = '';
+            document.getElementById('compose-body').value = '';
+        }
+
+        /**
+         * Hides the compose email modal.
+         */
+        function hideComposeModal() {
+            document.getElementById('compose-modal').classList.add('hidden');
+        }
+
+        /**
+         * Handles sending the composed email.
+         */
+        function sendEmail(event) {
+            event.preventDefault();
+            const to = document.getElementById('compose-to').value;
+            const subject = document.getElementById('compose-subject').value;
+            const body = document.getElementById('compose-body').value;
+
+            if (to && subject && body) {
+                // Mock sending the email by adding it to the 'sent' category
+                const newEmail = {
+                    id: generateId(),
+                    sender: "Me", // Assuming the user is "Me"
+                    subject: subject,
+                    body: body,
+                    time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                    category: "sent",
+                    read: true,
+                    starred: false,
+                    tags: ["Work"]
+                };
+                emails.push(newEmail);
+                
+                // Show a success message (using a simple mock for now)
+                document.getElementById('compose-status').textContent = `Email sent to ${to}! (Mock Action)`;
+                document.getElementById('compose-status').classList.remove('hidden');
+                
+                // Automatically hide the status after a few seconds
+                setTimeout(() => {
+                    document.getElementById('compose-status').classList.add('hidden');
+                    hideComposeModal();
+                    setActiveTab('Sent'); // Switch to Sent tab to see the new email
+                }, 1500);
+
+            } else {
+                alert('Please fill in To, Subject, and Body fields.');
+            }
+        }
+
+        // Initialize App on load
+        window.onload = () => {
+            // Initial render
+            setActiveTab('primary');
+
+            // Attach event listener for the compose form
+            document.getElementById('compose-form').addEventListener('submit', sendEmail);
+        };
+    </script>
+
+    <!-- 1. Header/Top Bar -->
+    <header class="flex-shrink-0 bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+            
+            <!-- Left: Menu, Logo, Search (Desktop) -->
+            <div class="flex items-center space-x-4">
+                <button id="menu-button" onclick="toggleSidebar()" class="text-gray-500 hover:bg-gray-100 p-2 rounded-full md:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+                <div class="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                    <span class="text-xl font-medium text-gray-800 hidden sm:inline">Gmail Clone</span>
+                </div>
+            </div>
+
+            <!-- Middle: Search Bar -->
+            <div class="flex-grow max-w-lg mx-4 hidden md:block">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
+                    <input type="text" placeholder="Search mail" class="w-full pl-10 pr-4 py-2 text-sm bg-gray-100 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+            </div>
+
+            <!-- Right: Profile -->
+            <div class="flex items-center space-x-3">
+                <button class="text-gray-500 hover:bg-gray-100 p-2 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                </button>
+                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-sm cursor-pointer">
+                    A
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. Main Content Area -->
+    <main class="flex flex-1 max-w-7xl mx-auto w-full">
+        
+        <!-- Sidebar Overlay (Mobile) -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden" onclick="toggleSidebar()"></div>
+
+        <!-- 2a. Sidebar (Navigation) -->
+        <nav id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-gray-200 p-3 z-30 transform -translate-x-full transition-transform duration-200 ease-in-out md:relative md:transform-none md:w-64 md:flex-shrink-0 md:border-r overflow-y-auto">
+            
+            <!-- Compose Button (Mobile & Desktop) -->
+            <button id="compose-button-desktop" onclick="showComposeModal()" class="w-full flex items-center space-x-4 px-5 py-3 bg-white shadow-md hover:shadow-lg rounded-full text-gray-800 transition-all font-medium mb-4 group">
+                <svg class="w-6 h-6 text-red-500 group-hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>Compose</span>
+            </button>
+            
+            <!-- Main Navigation Items -->
+            <div id="main-nav-items">
+                <!-- Dynamically generated navigation items -->
+                <script>
+                    const navContainer = document.getElementById('main-nav-items');
+                    let navHTML = '';
+                    sidebarItems.filter(item => item.type === 'nav').forEach(item => {
+                        navHTML += `
+                            <button data-tab="${item.name}" onclick="setActiveTab('${item.name}')" class="nav-item w-full flex items-center space-x-4 p-3 rounded-full text-gray-700 transition-colors ${item.name === 'Inbox' ? 'bg-blue-100 font-bold text-blue-800' : 'hover:bg-gray-200'}" aria-current="${item.name === 'Inbox' ? 'page' : 'false'}">
+                                ${item.icon}
+                                <span>${item.name}</span>
+                            </button>
+                        `;
+                    });
+                    navHTML += `<div class="mt-4 mb-2 text-sm text-gray-500 uppercase px-3">Categories</div>`;
+                    
+                    tabs.forEach(tab => {
+                        navHTML += `
+                            <button data-tab="${tab.name}" onclick="setActiveTab('${tab.name}')" class="tab-item w-full flex items-center space-x-4 p-3 rounded-full text-gray-700 transition-colors hover:bg-gray-200" aria-current="${tab.name === 'primary' ? 'page' : 'false'}">
+                                ${tab.icon}
+                                <span>${tab.label}</span>
+                            </button>
+                        `;
+                    });
+
+                    navHTML += `<div class="mt-4 mb-2 text-sm text-gray-500 uppercase px-3">Labels</div>`;
+
+                    sidebarItems.filter(item => item.type === 'label').forEach(item => {
+                        navHTML += `
+                            <button data-tab="${item.name}" onclick="setActiveTab('${item.name}')" class="nav-item w-full flex items-center space-x-4 p-3 rounded-full text-gray-700 transition-colors hover:bg-gray-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                                <span>${item.name.replace('Tags: ', '')}</span>
+                            </button>
+                        `;
+                    });
+
+                    navContainer.innerHTML = navHTML;
+                </script>
+            </div>
+            
+        </nav>
+
+        <!-- 2b. Main Content (Email List / Reading Pane) -->
+        <div class="flex-1 bg-white md:ml-0 overflow-y-auto">
+            <div id="content-container" class="p-0 md:p-6 min-h-full">
+                
+                <!-- Tab Controls (Only Primary/Social/Promotions/Updates) -->
+                <div class="sticky top-0 bg-white border-b border-gray-200 md:rounded-xl z-5">
+                    <div id="tab-headers" class="flex border-b border-gray-200">
+                        <script>
+                            const tabHeaders = document.getElementById('tab-headers');
+                            let tabHTML = '';
+                            tabs.forEach(tab => {
+                                tabHTML += `
+                                    <button data-tab="${tab.name}" onclick="setActiveTab('${tab.name}')" class="tab-item flex-1 flex items-center justify-center space-x-2 py-3 border-b-2 text-gray-600 transition-colors duration-150 hover:bg-gray-50 ${tab.name === 'primary' ? 'border-red-500 text-red-500 font-semibold' : 'border-transparent'}" aria-current="${tab.name === 'primary' ? 'page' : 'false'}">
+                                        ${tab.icon}
+                                        <span class="hidden sm:inline">${tab.label}</span>
+                                    </button>
+                                `;
+                            });
+                            tabHeaders.innerHTML = tabHTML;
+                        </script>
+                    </div>
+                </div>
+
+                <!-- Email List Container -->
+                <div id="email-list-container" class="bg-white md:rounded-b-xl overflow-hidden shadow-sm">
+                    <div id="email-list">
+                        <!-- Email items rendered by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Email Reading Pane Container -->
+                <div id="email-view-container" class="hidden bg-white md:rounded-xl shadow-lg p-4 sm:p-6">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-200">
+                        <button onclick="closeEmailView()" class="text-gray-500 hover:bg-gray-100 p-2 rounded-full flex items-center space-x-2 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                            <span class="hidden sm:inline">Back to Inbox</span>
+                        </button>
+                        <div class="flex space-x-2">
+                            <button class="text-gray-500 hover:bg-gray-100 p-2 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg></button>
+                            <button class="text-gray-500 hover:bg-gray-100 p-2 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                        </div>
+                    </div>
+
+                    <!-- Subject -->
+                    <h2 id="view-subject" class="text-2xl font-semibold my-4 text-gray-800"></h2>
+                    
+                    <!-- Sender Details -->
+                    <div class="flex items-start space-x-4 pb-4 border-b border-gray-200">
+                        <div id="view-sender-icon" class="w-10 h-10 rounded-full bg-red-400 flex items-center justify-center text-white font-semibold text-lg flex-shrink-0"></div>
+                        <div class="flex-1 min-w-0">
+                            <div id="view-sender-name" class="font-bold text-gray-800 truncate"></div>
+                            <div class="text-sm text-gray-500">to me</div>
+                        </div>
+                        <div id="view-time" class="text-sm text-gray-500 flex-shrink-0"></div>
+                    </div>
+
+                    <!-- Body -->
+                    <div id="view-body" class="pt-6 text-gray-700 min-h-[300px]">
+                        <!-- Email body content -->
+                    </div>
+
+                    <!-- Reply/Forward Actions -->
+                    <div class="pt-6 flex space-x-3">
+                        <button class="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors text-sm font-medium text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a2 2 0 012 2v2a2 2 0 01-2 2H3m2-4l-2 2m0 0l2 2"/></svg>
+                            <span>Reply</span>
+                        </button>
+                        <button class="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-100 transition-colors text-sm font-medium text-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h-2m-2 0H6m6 0v7M6 10v7m8-7v7m0 0l-2 2m2-2l2 2m-2-2h-2m2 2h2m-2-2h-2m2 2h2m-2-2h-2" /></svg>
+                            <span>Forward</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- 3. Floating Compose Button (Mobile) -->
+    <button id="compose-button" onclick="showComposeModal()" class="md:hidden fixed z-40 bg-red-500 shadow-xl hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all p-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+    </button>
+
+    <!-- 4. Compose Modal -->
+    <div id="compose-modal" class="fixed inset-0 z-50 bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center bg-gray-100 p-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">New Message</h3>
+                <button onclick="hideComposeModal()" class="text-gray-500 hover:text-gray-800 p-1 rounded-full hover:bg-gray-200 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <!-- Compose Form -->
+            <form id="compose-form" class="flex flex-col flex-1 overflow-y-auto">
+                <div class="p-4 space-y-3">
+                    <input id="compose-to" type="email" placeholder="To" required class="w-full border-b border-gray-300 p-2 focus:outline-none focus:border-blue-500 transition-colors">
+                    <input id="compose-subject" type="text" placeholder="Subject" required class="w-full border-b border-gray-300 p-2 focus:outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <div class="flex-1 p-4">
+                    <textarea id="compose-body" placeholder="Write your email here..." required rows="10" class="w-full h-full p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"></textarea>
+                </div>
+                
+                <!-- Modal Footer -->
+                <div class="p-4 flex items-center justify-between bg-gray-50 border-t border-gray-200 flex-shrink-0">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-full shadow-lg transition-all flex items-center space-x-2">
+                        <span>Send</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                    </button>
+                    <!-- Mock status message for successful send -->
+                    <div id="compose-status" class="hidden text-sm text-green-600 font-semibold transition-opacity opacity-100"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
