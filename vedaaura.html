@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veda Aura | Bespoke Ayurvedic Elixirs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #0c0c0c;
+            color: #d1d1d1;
+            scroll-behavior: smooth;
+        }
+        h1, h2, h3, .serif {
+            font-family: 'Playfair Display', serif;
+        }
+        .gold-text {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gold-border {
+            border-image: linear-gradient(to right, #bf953f, #fcf6ba, #aa771c) 1;
+        }
+        .bg-sandalwood {
+            background-color: #1a1614;
+        }
+        .hero-overlay {
+            background: linear-gradient(to bottom, rgba(12, 12, 12, 0.4), rgba(12, 12, 12, 0.9));
+        }
+        .fade-in {
+            animation: fadeIn 1.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-hover:hover {
+            transform: translateY(-10px);
+            transition: all 0.5s ease;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent backdrop-blur-sm">
+        <div class="text-2xl font-bold tracking-[0.2em] gold-text uppercase">Veda Aura</div>
+        <div class="hidden md:flex space-x-12 text-xs uppercase tracking-widest font-light">
+            <a href="#about" class="hover:text-amber-200 transition">The Philosophy</a>
+            <a href="#offerings" class="hover:text-amber-200 transition">Offerings</a>
+            <a href="#craft" class="hover:text-amber-200 transition">Sourcing</a>
+            <a href="#contact" class="hover:text-amber-200 transition">Contact</a>
+        </div>
+        <a href="#consultation" class="border gold-border px-6 py-2 text-[10px] uppercase tracking-widest hover:bg-amber-900/20 transition">
+            Begin Journey
+        </a>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative h-screen flex items-center justify-center text-center px-4 overflow-hidden">
+        <!-- Mock Video/Image Background -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover opacity-50 scale-105" alt="Ritual Pouring">
+            <div class="absolute inset-0 hero-overlay"></div>
+        </div>
+        
+        <div class="relative z-10 max-w-4xl fade-in">
+            <h1 class="text-5xl md:text-8xl mb-6 gold-text italic">Eternal Radiance</h1>
+            <p class="text-lg md:text-xl font-light tracking-wide mb-10 text-stone-300">
+                Handcrafted masterpieces tailored to your dosha,<br class="hidden md:block"> infused with the world's rarest botanicals.
+            </p>
+            <div class="flex flex-col md:flex-row items-center justify-center gap-6">
+                <a href="#consultation" class="bg-stone-100 text-black px-10 py-4 uppercase tracking-[0.2em] text-xs font-bold hover:bg-amber-100 transition duration-500">
+                    Secure a Consultation
+                </a>
+                <a href="#quiz" class="text-white border-b border-stone-500 pb-1 uppercase tracking-[0.2em] text-xs font-medium hover:border-amber-400 transition">
+                    Discover Your Dosha
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Personalization Section -->
+    <section id="about" class="py-24 px-8 md:px-24 bg-sandalwood">
+        <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+            <div class="order-2 md:order-1">
+                <img src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&q=80&w=1200" class="shadow-2xl grayscale hover:grayscale-0 transition duration-1000" alt="Ayurvedic Ritual">
+            </div>
+            <div class="order-1 md:order-2 space-y-8">
+                <h2 class="text-4xl md:text-5xl gold-text">The Sacred Art of Dosha Harmony</h2>
+                <p class="text-stone-400 leading-relaxed text-lg">
+                    True beauty is not a surface endeavor; it is a cosmic alignment. Each Veda Aura elixir begins with a private diagnostic, mapping your unique elemental constitution—Vata, Pitta, or Kapha.
+                </p>
+                <p class="text-stone-400 leading-relaxed italic">
+                    "We do not mass produce. We manifest. Your oil is infused during specific lunar cycles, stirred with gold instruments, and aged in violet glass to preserve the prana of the herbs."
+                </p>
+                <div id="quiz" class="p-8 border border-stone-800 bg-black/40">
+                    <h3 class="text-xl mb-4 text-white">The Elemental Inquiry</h3>
+                    <p class="text-sm mb-6 text-stone-500">Begin your journey with a complimentary elemental assessment.</p>
+                    <button class="w-full py-4 border gold-border text-xs uppercase tracking-widest hover:bg-amber-500/10 transition">Start Free Quiz</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Offerings Section -->
+    <section id="offerings" class="py-32 px-8 bg-black">
+        <div class="max-w-7xl mx-auto text-center mb-20">
+            <h2 class="text-4xl md:text-6xl gold-text mb-4">Timeless Elixirs</h2>
+            <p class="text-stone-500 uppercase tracking-widest text-sm">Limited Batches • Crafted for the Few</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-12 max-w-7xl mx-auto">
+            <!-- Tier 1 -->
+            <div class="p-10 border border-stone-900 flex flex-col items-center text-center card-hover bg-stone-950">
+                <div class="w-20 h-20 mb-8 border border-amber-900 rounded-full flex items-center justify-center text-amber-600">
+                    <i data-lucide="sun" class="w-10 h-10"></i>
+                </div>
+                <h3 class="text-2xl mb-4 text-white">Signature Elixir</h3>
+                <p class="text-stone-500 text-sm mb-8 leading-relaxed">A bespoke introduction to personalized skincare. Wild-harvested base oils aged for six months.</p>
+                <p class="text-amber-200 text-lg mb-8 tracking-widest">From $1,200</p>
+                <button class="mt-auto text-[10px] uppercase tracking-[0.2em] border-b border-stone-700 pb-2 hover:text-amber-400 transition">Inquire for Batch 08</button>
+            </div>
+
+            <!-- Tier 2 -->
+            <div class="p-10 border gold-border flex flex-col items-center text-center card-hover bg-[#12110f] relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-amber-600 text-[8px] text-white px-4 py-1 uppercase tracking-tighter">Most Coveted</div>
+                <div class="w-20 h-20 mb-8 border border-amber-600 rounded-full flex items-center justify-center text-amber-500">
+                    <i data-lucide="crown" class="w-10 h-10"></i>
+                </div>
+                <h3 class="text-2xl mb-4 text-white">Royal Heritage</h3>
+                <p class="text-stone-400 text-sm mb-8 leading-relaxed">Infused with 24k Gold Bhasma and Grade-A Kashmiri Saffron. Hand-blended under the Full Moon.</p>
+                <p class="text-amber-400 text-lg mb-8 tracking-widest">From $4,500</p>
+                <button class="mt-auto text-[10px] uppercase tracking-[0.2em] bg-white text-black px-6 py-3 font-bold hover:bg-amber-100 transition">Request Invitation</button>
+            </div>
+
+            <!-- Tier 3 -->
+            <div class="p-10 border border-stone-900 flex flex-col items-center text-center card-hover bg-stone-950">
+                <div class="w-20 h-20 mb-8 border border-amber-900 rounded-full flex items-center justify-center text-amber-600">
+                    <i data-lucide="infinity" class="w-10 h-10"></i>
+                </div>
+                <h3 class="text-2xl mb-4 text-white">Pinnacle Legacy</h3>
+                <p class="text-stone-500 text-sm mb-8 leading-relaxed">The ultimate heirloom. Includes 50-year aged Mysore Sandalwood and a personalized crystal vessel.</p>
+                <p class="text-amber-200 text-lg mb-8 tracking-widest">Inquire Privately</p>
+                <button class="mt-auto text-[10px] uppercase tracking-[0.2em] border-b border-stone-700 pb-2 hover:text-amber-400 transition">Concierge Inquiry</button>
+            </div>
+        </div>
+        <p class="text-center mt-16 text-stone-600 text-xs italic">Only 42 vessels remain for the 2026 cycle.</p>
+    </section>
+
+    <!-- Craftsmanship -->
+    <section id="craft" class="py-32 px-8 md:px-24 bg-sandalwood">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl md:text-5xl gold-text text-center mb-16">The Sourcing Narrative</h2>
+            <div class="space-y-24">
+                <div class="flex flex-col md:flex-row gap-12 items-center">
+                    <div class="md:w-1/2">
+                        <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&q=80&w=800" class="aspect-[4/5] object-cover" alt="Saffron">
+                    </div>
+                    <div class="md:w-1/2">
+                        <span class="text-amber-500 text-xs tracking-[0.3em] uppercase">The Saffron of Kashmir</span>
+                        <h4 class="text-3xl mt-4 mb-6 text-white italic">Rarer than Rubies</h4>
+                        <p class="text-stone-400 leading-relaxed mb-6">
+                            Our Mogra Saffron is hand-plucked in the brief autumn window of the Pampore highlands. It takes 150,000 flowers to produce a single kilogram of this elixir’s core.
+                        </p>
+                        <i data-lucide="quote" class="text-stone-800 w-12 h-12"></i>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row-reverse gap-12 items-center">
+                    <div class="md:w-1/2">
+                        <img src="https://images.unsplash.com/photo-1547113110-681026df1117?auto=format&fit=crop&q=80&w=800" class="aspect-[4/5] object-cover" alt="Sandalwood">
+                    </div>
+                    <div class="md:w-1/2">
+                        <span class="text-amber-500 text-xs tracking-[0.3em] uppercase">Aged Mysore Sandalwood</span>
+                        <h4 class="text-3xl mt-4 mb-6 text-white italic">Scent of the Divine</h4>
+                        <p class="text-stone-400 leading-relaxed mb-6">
+                            Sourced from ethically managed, centuries-old groves, our sandalwood oil is distilled and aged for decades, creating a molecular density that bonds with your skin’s own DNA.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="py-24 bg-black px-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl gold-text mb-12">Voices of Renewal</h2>
+            <div class="space-y-12">
+                <blockquote class="text-xl md:text-2xl text-stone-300 italic font-light">
+                    "This is not skincare. It is a spiritual awakening for the skin. After three weeks of the Royal Heritage blend, my complexion carries a glow I haven't seen since my twenties."
+                    <footer class="mt-4 text-xs tracking-widest uppercase text-amber-600">— S. Rothschild, London</footer>
+                </blockquote>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section id="consultation" class="py-32 px-8 bg-stone-950">
+        <div class="max-w-4xl mx-auto border gold-border p-12 md:p-20 text-center">
+            <h2 class="text-4xl md:text-6xl gold-text mb-6 italic">Secure Your Sanctuary</h2>
+            <p class="text-stone-400 mb-10 text-lg">Batch allocations are currently open for limited enrollment. Begin your bespoke consultation with our master Ayurvedic apothecary.</p>
+            
+            <form class="space-y-6 max-w-lg mx-auto">
+                <input type="text" placeholder="Full Name" class="w-full bg-transparent border-b border-stone-800 py-3 text-stone-300 focus:outline-none focus:border-amber-500 transition">
+                <input type="email" placeholder="Private Email Address" class="w-full bg-transparent border-b border-stone-800 py-3 text-stone-300 focus:outline-none focus:border-amber-500 transition">
+                <select class="w-full bg-transparent border-b border-stone-800 py-3 text-stone-500 focus:outline-none focus:border-amber-500 transition appearance-none">
+                    <option>Desired Experience</option>
+                    <option>Bespoke Consultation ($500)</option>
+                    <option>Waitlist Application (Batch 09)</option>
+                    <option>Corporate Gifting Inquiry</option>
+                </select>
+                <button type="submit" class="w-full py-5 bg-white text-black uppercase tracking-[0.3em] text-xs font-bold hover:bg-amber-100 transition mt-8">
+                    Apply for Access
+                </button>
+            </form>
+            <p class="mt-8 text-[10px] text-stone-600 uppercase tracking-widest">A member of our concierge will contact you within 48 hours.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 bg-black border-t border-stone-900 px-8 text-center">
+        <div class="text-xl gold-text tracking-[0.3em] uppercase mb-8">Veda Aura</div>
+        <div class="flex justify-center space-x-8 mb-8 text-stone-600">
+            <a href="#" class="hover:text-amber-500"><i data-lucide="instagram"></i></a>
+            <a href="#" class="hover:text-amber-500"><i data-lucide="mail"></i></a>
+        </div>
+        <p class="text-[10px] text-stone-700 tracking-[0.2em] uppercase">
+            Handcrafted with Reverence © 2026 Veda Aura Apothecary. <br class="md:hidden"> All Rights Reserved.
+        </p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // Simple scroll reveal
+        window.addEventListener('scroll', () => {
+            const reveals = document.querySelectorAll('.card-hover');
+            reveals.forEach(reveal => {
+                const windowHeight = window.innerHeight;
+                const revealTop = reveal.getBoundingClientRect().top;
+                if (revealTop < windowHeight - 100) {
+                    reveal.style.opacity = '1';
+                    reveal.style.transform = 'translateY(0)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
